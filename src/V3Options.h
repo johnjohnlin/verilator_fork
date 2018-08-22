@@ -41,6 +41,9 @@ typedef std::vector<string> V3StringList;
 typedef std::set<string> V3StringSet;
 
 class V3Options {
+  public:
+    enum TraceFormat {VCD = 0, LXT2, TRACE_FORMAT_NUM};
+  private:
     // TYPES
     typedef std::map<string,int> DebugSrcMap;
 
@@ -130,6 +133,7 @@ class V3Options {
     int		m_traceMaxWidth;// main switch: --trace-max-width
     int		m_unrollCount;	// main switch: --unroll-count
     int		m_unrollStmts;	// main switch: --unroll-stmts
+    TraceFormat m_traceFormat; // main switch: --trace (VCD; default) or --trace-lxt2
 
     int         m_compLimitBlocks;  // compiler selection; number of nested blocks
     int         m_compLimitMembers;  // compiler selection; number of members in struct before make anon array
@@ -289,6 +293,7 @@ class V3Options {
     int	   traceMaxWidth() const { return m_traceMaxWidth; }
     int	   unrollCount() const { return m_unrollCount; }
     int	   unrollStmts() const { return m_unrollStmts; }
+    TraceFormat traceFormat() const { return m_traceFormat; }
 
     int    compLimitBlocks() const { return m_compLimitBlocks; }
     int    compLimitMembers() const { return m_compLimitMembers; }
@@ -345,7 +350,20 @@ class V3Options {
     bool oTable() const { return m_oTable; }
 
     // METHODS (uses above)
-    string traceClassBase() const { return "VerilatedVcd"; }
+    string traceClassBase() const {
+        const string names[int(TRACE_FORMAT_NUM)] = {
+            "VerilatedVcd",
+            "VerilatedLxt2"
+        };
+        return names[int(m_traceFormat)];
+    }
+    string traceSourceName() const {
+        const string names[int(TRACE_FORMAT_NUM)] = {
+            "verilated_vcd",
+            "verilated_lxt2"
+        };
+        return names[int(m_traceFormat)];
+    }
 
     // METHODS (from main)
     static string version();
