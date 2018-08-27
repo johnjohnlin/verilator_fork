@@ -122,6 +122,7 @@ class VL_CAPABILITY("mutex") VerilatedMutex {
   public:
     VerilatedMutex() {}
     ~VerilatedMutex() {}
+    const VerilatedMutex& operator!() const { return *this; }  // For -fthread_safety
     /// Acquire/lock mutex
     void lock() VL_ACQUIRE() {
         // Try to acquire the lock by spinning.  If the wait is short,
@@ -446,6 +447,9 @@ public:
     /// Produce name & version for (at least) VPI
     static const char* productName() VL_PURE { return VERILATOR_PRODUCT; }
     static const char* productVersion() VL_PURE { return VERILATOR_VERSION; }
+
+    /// Convenience OS utilities
+    static void mkdir(const char* dirname) VL_MT_UNSAFE;
 
     /// When multithreaded, quiesce the model to prepare for trace/saves/coverage
     /// This may only be called when no locks are held.
