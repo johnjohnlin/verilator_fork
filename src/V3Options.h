@@ -31,39 +31,47 @@
 #include "V3Global.h"
 #include "V3LangCode.h"
 
-//######################################################################
-// V3Options - Command line options
-
 class V3OptionsImp;
 class FileLine;
+
+//######################################################################
+
+class TraceFormat {
+public:
+    enum en {
+        VCD = 0,
+        LXT2
+    } m_e;
+    inline TraceFormat(en _e = VCD) : m_e(_e) {}
+    explicit inline TraceFormat(int _e) : m_e(static_cast<en>(_e)) {}
+    operator en() const { return m_e; }
+    string classBase() const {
+        static const char* const names[] = {
+            "VerilatedVcd",
+            "VerilatedLxt2"
+        };
+        return names[m_e];
+    }
+    string sourceName() const {
+        static const char* const names[] = {
+            "verilated_vcd",
+            "verilated_lxt2"
+        };
+        return names[m_e];
+    }
+};
+inline bool operator==(TraceFormat lhs, TraceFormat rhs) { return (lhs.m_e == rhs.m_e); }
+inline bool operator==(TraceFormat lhs, TraceFormat::en rhs) { return (lhs.m_e == rhs); }
+inline bool operator==(TraceFormat::en lhs, TraceFormat rhs) { return (lhs == rhs.m_e); }
 
 typedef std::vector<string> V3StringList;
 typedef std::set<string> V3StringSet;
 
+//######################################################################
+// V3Options - Command line options
+
 class V3Options {
   public:
-    struct TraceFormat {
-        enum en {
-            VCD = 0,
-            LXT2,
-            TRACE_FORMAT_NUM
-        } m_e;
-        TraceFormat(en _e = VCD): m_e(_e) {}
-        string classBase() const {
-            const string names[int(TRACE_FORMAT_NUM)] = {
-                "VerilatedVcd",
-                "VerilatedLxt2"
-            };
-            return names[int(m_e)];
-        }
-        string sourceName() const {
-            const string names[int(TRACE_FORMAT_NUM)] = {
-                "verilated_vcd",
-                "verilated_lxt2"
-            };
-            return names[int(m_e)];
-        }
-    };
 
   private:
     // TYPES
@@ -151,11 +159,11 @@ class V3Options {
     int		m_threads;	// main switch: --threads (0 == --no-threads)
     int         m_threadsMaxMTasks;  // main switch: --threads-max-mtasks
     int		m_traceDepth;	// main switch: --trace-depth
+    TraceFormat m_traceFormat;  // main switch: --trace or --trace-lxt2
     int		m_traceMaxArray;// main switch: --trace-max-array
     int		m_traceMaxWidth;// main switch: --trace-max-width
     int		m_unrollCount;	// main switch: --unroll-count
     int		m_unrollStmts;	// main switch: --unroll-stmts
-    TraceFormat m_traceFormat; // main switch: --trace (VCD; default) or --trace-lxt2
 
     int         m_compLimitBlocks;  // compiler selection; number of nested blocks
     int         m_compLimitMembers;  // compiler selection; number of members in struct before make anon array
@@ -310,12 +318,12 @@ class V3Options {
     int threads() const { return m_threads; }
     int threadsMaxMTasks() const { return m_threadsMaxMTasks; }
     bool mtasks() const { return (m_threads > 1); }
-    int	   traceDepth() const { return m_traceDepth; }
+    int traceDepth() const { return m_traceDepth; }
+    TraceFormat traceFormat() const { return m_traceFormat; }
     int	   traceMaxArray() const { return m_traceMaxArray; }
     int	   traceMaxWidth() const { return m_traceMaxWidth; }
     int	   unrollCount() const { return m_unrollCount; }
     int	   unrollStmts() const { return m_unrollStmts; }
-    TraceFormat traceFormat() const { return m_traceFormat; }
 
     int    compLimitBlocks() const { return m_compLimitBlocks; }
     int    compLimitMembers() const { return m_compLimitMembers; }
@@ -407,13 +415,6 @@ class V3Options {
     // METHODS (other OS)
     static void throwSigsegv();
 };
-
-inline bool operator== (V3Options::TraceFormat lhs, V3Options::TraceFormat rhs) { return (lhs.m_e == rhs.m_e); }
-inline bool operator== (V3Options::TraceFormat lhs, V3Options::TraceFormat::en rhs) { return (lhs.m_e == rhs); }
-inline bool operator== (V3Options::TraceFormat::en lhs, V3Options::TraceFormat rhs) { return (lhs == rhs.m_e); }
-inline bool operator!= (V3Options::TraceFormat lhs, V3Options::TraceFormat rhs) { return !(lhs.m_e == rhs.m_e); }
-inline bool operator!= (V3Options::TraceFormat lhs, V3Options::TraceFormat::en rhs) { return !(lhs.m_e == rhs); }
-inline bool operator!= (V3Options::TraceFormat::en lhs, V3Options::TraceFormat rhs) { return !(lhs == rhs.m_e); }
 
 //######################################################################
 

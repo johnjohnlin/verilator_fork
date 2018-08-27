@@ -23,6 +23,10 @@
 #ifndef DEFS_LXTW_H
 #define DEFS_LXTW_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -303,5 +307,8 @@ int 			lxt2_wr_emit_value_double(struct lxt2_wr_trace *lt, struct lxt2_wr_symbol
 int 			lxt2_wr_emit_value_string(struct lxt2_wr_trace *lt, struct lxt2_wr_symbol *s, unsigned int row, char *value);
 int 			lxt2_wr_emit_value_bit_string(struct lxt2_wr_trace *lt, struct lxt2_wr_symbol *s, unsigned int row, char *value);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif

@@ -674,9 +674,9 @@ void VerilatedVcd::dump(vluint64_t timeui) {
     }
     dumpPrep(timeui);
     Verilated::quiesce();
-    for (vluint32_t ent = 0; ent< m_callbacks.size(); ent++) {
-        VerilatedVcdCallInfo *cip = m_callbacks[ent];
-        (cip->m_changecb) (this, cip->m_userthis, cip->m_code);
+    for (vluint32_t ent = 0; ent< m_callbacks.size(); ++ent) {
+        VerilatedVcdCallInfo* cip = m_callbacks[ent];
+        (cip->m_changecb)(this, cip->m_userthis, cip->m_code);
     }
 }
 

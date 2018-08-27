@@ -1810,13 +1810,13 @@ while(s->aliased_to)	/* find root alias if exists */
 valuelen = strlen(value);	/* ensure string is proper length */
 if(valuelen == s->len)
 	{
-	vfix = (char*) wave_alloca(s->len+1);
+	vfix = (char*)wave_alloca(s->len+1);
 	strcpy(vfix, value);
 	value = vfix;
 	}
 	else
 	{
-	vfix = (char*) wave_alloca(s->len+1);
+	vfix = (char*)wave_alloca(s->len+1);
 
 	if(valuelen < s->len)
 		{
@@ -2088,7 +2088,7 @@ if((lt)&&(lt->blackout))
 					else
 					{
 					free(s->value);
-					s->value = (char*) calloc(1, 1*sizeof(char));
+					s->value = (char*)calloc(1, 1*sizeof(char));
 					}
 				}
 			}

@@ -3,20 +3,19 @@
 # Author: Yu-Sheng Lin johnjohnlys@media.ee.ntu.edu.tw
 
 if (!$::Driver) { use FindBin; exec("$FindBin::Bin/bootstrap.pl", @ARGV, $0); die; }
+
 scenarios(vlt_all => 1);
 
-top_filename("t/t_trace_lxt2.v");
 compile(
-	make_top_shell => 0,
-	make_main => 0,
-	v_flags2 => ["--trace-lxt2 --exe $Self->{t_dir}/$Self->{name}.cpp"],
-);
-execute(
-	check_finished => 1,
+    v_flags2 => ["--trace-lxt2"],
 );
 
-lxt2vcd("$Self->{obj_dir}/simx.lxt2", "$Self->{obj_dir}/simx.vcd");
-vcd_identical("$Self->{obj_dir}/simx.vcd", "t/$Self->{name}.out");
+execute(
+    check_finished => 1,
+);
+
+lxt2vcd($Self->trace_filename, "$Self->{obj_dir}/simx-lxt2vcd.vcd");
+vcd_identical("$Self->{obj_dir}/simx-lxt2vcd.vcd", "t/$Self->{name}.out");
 
 ok(1);
 1;

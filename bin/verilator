@@ -356,7 +356,7 @@ detailed descriptions in L</"VERILATION ARGUMENTS"> for more information.
     --threads-max-mtasks <mtasks>  Tune maximum mtask partitioning
     --top-module <topname>      Name of top level input module
     --trace                     Enable waveform creation
-    --trace-lxt2                Enable LXT2 waveform creation (will override --trace)
+    --trace-lxt2                Enable LXT2 waveform creation
     --trace-depth <levels>      Depth of tracing
     --trace-max-array <depth>   Maximum bit width for tracing
     --trace-max-width <width>   Maximum array depth for tracing
@@ -1241,16 +1241,22 @@ designs with only one top.
 
 =item --trace
 
-Adds waveform tracing code to the model.  Verilator will generate
-additional {prefix}__Trace*.cpp files that will need to be compiled.  In
-addition verilated_vcd_sc.cpp (for SystemC traces) or verilated_vcd_c.cpp
-(for both) must be compiled and linked in.  If using the Verilator
-generated Makefiles, these files will be added as source targets for you.
-If you're not using the Verilator makefiles, you will need to add these to
-your Makefile manually.
+Adds waveform tracing code to the model using VCD format. This overrides
+C<--trace-lxt2>.
+
+Verilator will generate additional {prefix}__Trace*.cpp files that will
+need to be compiled.  In addition verilated_vcd_sc.cpp (for SystemC traces)
+or verilated_vcd_c.cpp (for both) must be compiled and linked in.  If using
+the Verilator generated Makefiles, these files will be added as source
+targets for you.  If you're not using the Verilator makefiles, you will
+need to add these to your Makefile manually.
 
 Having tracing compiled in may result in some small performance losses,
 even when waveforms are not turned on during model execution.
+
+=item --trace-lxt2
+
+Enable LXT2 waveform tracing in the model. This overrides C<--trace>.
 
 =item --trace-depth I<levels>
 
