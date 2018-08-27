@@ -91,8 +91,8 @@ public:
 		    if (v3Global.opt.trace()) {
 			putMakeClassEntry(of, v3Global.opt.traceSourceName() +"_c.cpp");
 			if (v3Global.opt.systemC()) {
-				if (v3Global.opt.traceFormat() == V3Options::LXT2) {
-					v3fatal("verilator: LXT2 trace format does not support SystemC now");
+				if (v3Global.opt.traceFormat() != V3Options::TraceFormat::VCD) {
+					v3fatal("verilator: Only VCD trace format is supported for SystemC now");
 				}
 			    putMakeClassEntry(of, (v3Global.opt.traceSourceName()+"_sc.cpp").c_str());
 			}

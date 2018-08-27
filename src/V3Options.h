@@ -42,7 +42,29 @@ typedef std::set<string> V3StringSet;
 
 class V3Options {
   public:
-    enum TraceFormat {VCD = 0, LXT2, TRACE_FORMAT_NUM};
+    struct TraceFormat {
+        enum en {
+            VCD = 0,
+            LXT2,
+            TRACE_FORMAT_NUM
+        } m_e;
+        TraceFormat(en _e = VCD): m_e(_e) {}
+        string classBase() const {
+            const string names[int(TRACE_FORMAT_NUM)] = {
+                "VerilatedVcd",
+                "VerilatedLxt2"
+            };
+            return names[int(m_e)];
+        }
+        string sourceName() const {
+            const string names[int(TRACE_FORMAT_NUM)] = {
+                "verilated_vcd",
+                "verilated_lxt2"
+            };
+            return names[int(m_e)];
+        }
+    };
+
   private:
     // TYPES
     typedef std::map<string,int> DebugSrcMap;
@@ -349,21 +371,8 @@ class V3Options {
     bool oSubstConst() const { return m_oSubstConst; }
     bool oTable() const { return m_oTable; }
 
-    // METHODS (uses above)
-    string traceClassBase() const {
-        const string names[int(TRACE_FORMAT_NUM)] = {
-            "VerilatedVcd",
-            "VerilatedLxt2"
-        };
-        return names[int(m_traceFormat)];
-    }
-    string traceSourceName() const {
-        const string names[int(TRACE_FORMAT_NUM)] = {
-            "verilated_vcd",
-            "verilated_lxt2"
-        };
-        return names[int(m_traceFormat)];
-    }
+    string traceClassBase() const { return m_traceFormat.classBase(); }
+    string traceSourceName() const { return m_traceFormat.sourceName(); }
 
     // METHODS (from main)
     static string version();
@@ -398,6 +407,13 @@ class V3Options {
     // METHODS (other OS)
     static void throwSigsegv();
 };
+
+inline bool operator== (V3Options::TraceFormat lhs, V3Options::TraceFormat rhs) { return (lhs.m_e == rhs.m_e); }
+inline bool operator== (V3Options::TraceFormat lhs, V3Options::TraceFormat::en rhs) { return (lhs.m_e == rhs); }
+inline bool operator== (V3Options::TraceFormat::en lhs, V3Options::TraceFormat rhs) { return (lhs == rhs.m_e); }
+inline bool operator!= (V3Options::TraceFormat lhs, V3Options::TraceFormat rhs) { return !(lhs.m_e == rhs.m_e); }
+inline bool operator!= (V3Options::TraceFormat lhs, V3Options::TraceFormat::en rhs) { return !(lhs.m_e == rhs); }
+inline bool operator!= (V3Options::TraceFormat::en lhs, V3Options::TraceFormat rhs) { return !(lhs == rhs.m_e); }
 
 //######################################################################
 

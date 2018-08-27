@@ -356,6 +356,7 @@ detailed descriptions in L</"VERILATION ARGUMENTS"> for more information.
     --threads-max-mtasks <mtasks>  Tune maximum mtask partitioning
     --top-module <topname>      Name of top level input module
     --trace                     Enable waveform creation
+    --trace-lxt2                Enable LXT2 waveform creation (will override --trace)
     --trace-depth <levels>      Depth of tracing
     --trace-max-array <depth>   Maximum bit width for tracing
     --trace-max-width <width>   Maximum array depth for tracing
@@ -4101,13 +4102,11 @@ trace file if you want all data to land in the same output file.
 =item How do I generate LXT2 waveforms (traces) in C++?
 
 LXT2 a format by GTKWave, which is usually 10x smaller than VCD format.
+This version provides a basic LXT2 support.
 To dump LXT2 format, add the --trace switch to Verilator and change the include path in the testbench to:
 
     #include "verilated_lxt2_c.h"
-
-Also LXT2 format requires zlib, so add this to the Verilator flags.
-
-    -LDFLAGS "-lz"
+    VerilatedLxt2C* tfp = new VerilatedLxt2C;
 
 Note that currently supporting both LXT2 and VCD in a single simulation is impossible,
 but such requirement could be rare.
@@ -4118,9 +4117,10 @@ Not supported yet.
 
 =item How do I view waveforms (traces)?
 
-Verilator makes standard VCD (Value Change Dump) files.  They are viewable
+Verilator makes standard VCD (Value Change Dump) and LXT2 files.  VCD files are viewable
 with the public domain GtkWave (recommended) or Dinotrace (legacy)
-programs, or any of the many commercial offerings.
+programs, or any of the many commercial offerings;
+LXT2 is supported by GtkWave only.
 
 =item How do I reduce the size of large waveform (trace) files?
 

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <cstdio>
 #include "Vt_trace_lxt2.h"
 #include "verilated_lxt2_c.h"
 // This file ONLY is placed into the Public Domain, for any use,
@@ -10,7 +11,7 @@
 int main()
 {
 	using namespace std;
-	constexpr int SIM_CYCLE = 1000;
+	const int SIM_CYCLE = 1000;
 
 	// Init simulation
 	Vt_trace_lxt2 *TOP = new Vt_trace_lxt2;
@@ -33,7 +34,7 @@ int main()
 	Eval;
 	for (
 		int cycle = 0;
-		cycle < SIM_CYCLE and not Verilated::gotFinish();
+		cycle < SIM_CYCLE && !Verilated::gotFinish();
 		++cycle
 	) {
 		TOP->clk = 1;
@@ -48,5 +49,6 @@ int main()
 	tfp->close();
 	delete tfp;
 	delete TOP;
+    printf("*-* All Finished *-*\n");
 	return 0;
 }

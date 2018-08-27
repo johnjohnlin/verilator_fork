@@ -1594,6 +1594,23 @@ sub vcd_identical {
     return 1;
 }
 
+sub lxt2vcd {
+    my $self = (ref $_[0]? shift : $Self);
+    my $fn1 = shift;
+    my $fn2 = shift;
+    if (!-r $fn1) { $self->error("File does not exist $fn1\n"); return 0; }
+    my $cmd = qq{lxt2vcd --help};
+    print "\t$cmd\n" if $::Debug;
+    my $out = `$cmd`;
+    if ($out !~ /Usage:/) { $self->skip("No lxt2vcd installed\n"); return 0; }
+
+    $cmd = qq{lxt2vcd "$fn1" -o "$fn2"};
+    print "\t$cmd\n" if $::Debug;
+    $out = `$cmd`;
+    return 1;
+}
+
+
 sub _vcd_read {
     my $self = (ref $_[0]? shift : $Self);
     my $filename = shift;
