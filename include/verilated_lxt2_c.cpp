@@ -70,7 +70,8 @@ protected:
 
 VerilatedLxt2::VerilatedLxt2(lxt2_wr_trace* lxt2)
     : m_lxt2(lxt2),
-      m_scopeEscape('.') { }
+      m_scopeEscape('.'),
+      m_fullDump(true) {}
 
 void VerilatedLxt2::open(const char* filename) VL_MT_UNSAFE {
     m_assertOne.check();
@@ -88,12 +89,10 @@ void VerilatedLxt2::module(const std::string& name) {
 
 //=============================================================================
 // Decl
-
-void VerilatedLxt2::declBit(vluint32_t code, const char* name, int arraynum) {
-    this->declBus(code, name, arraynum, 0, 0);
-}
-
-void VerilatedLxt2::declBus(vluint32_t code, const char* name, int arraynum, int msb, int lsb) {
+void VerilatedLxt2::declSymbol(vluint32_t code, const char* name, int arraynum, int msb, int lsb, int flags) {
+    if (msb == 0 && lsb == 0) {
+        msb = lsb = -1;
+    }
     std::pair<Code2SymbolType::iterator, bool> p
         = m_code2symbol.insert(std::make_pair(code, (lxt2_wr_symbol*)(NULL)));
     std::stringstream name_ss;
@@ -108,7 +107,8 @@ void VerilatedLxt2::declBus(vluint32_t code, const char* name, int arraynum, int
         }
     }
     if (p.second) {  // New
-        p.first->second = lxt2_wr_symbol_add(m_lxt2, name_s.c_str(), 0, msb, lsb, LXT2_WR_SYM_F_BITS);
+        arraynum = arraynum < 0 ? 0 : arraynum;
+        p.first->second = lxt2_wr_symbol_add(m_lxt2, name_s.c_str(), 0, msb, lsb, flags);
         assert(p.first->second);
     } else {  // Alias
         lxt2_wr_symbol_alias(m_lxt2, p.first->second->name, name_s.c_str(), msb, lsb);
@@ -135,6 +135,14 @@ void VerilatedLxt2::addCallback(
 
 void VerilatedLxt2::dump(vluint64_t timeui) {
     if (!isOpen()) return;
+    if (VL_UNLIKELY(m_fullDump)) {
+        m_fullDump = false;  // No need for more full dumps
+        for (vluint32_t ent = 0; ent< m_callbacks.size(); ent++) {
+            VerilatedLxt2CallInfo *cip = m_callbacks[ent];
+            (cip->m_fullcb)(this, cip->m_userthis, cip->m_code);
+        }
+        return;
+    }
     lxt2_wr_set_time64(m_lxt2, timeui);
     for (vluint32_t ent = 0; ent< m_callbacks.size(); ++ent) {
         VerilatedLxt2CallInfo* cip = m_callbacks[ent];

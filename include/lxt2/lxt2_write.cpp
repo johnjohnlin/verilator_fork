@@ -27,7 +27,6 @@
 #include "lxt2_config.h"
 #include "lxt2_write.h"
 
-
 static char *lxt2_wr_vcd_truncate_bitvec(char *s)
 {
 char l, r;

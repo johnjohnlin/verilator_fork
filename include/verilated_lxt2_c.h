@@ -46,12 +46,14 @@ class VerilatedLxt2 {
 private:
     lxt2_wr_trace* m_lxt2;
     VerilatedAssertOneThread m_assertOne;  ///< Assert only called from single thread
+    bool m_fullDump;
     char m_scopeEscape;
     std::string m_module;
     CallbackVec m_callbacks;  ///< Routines to perform dumping
     Code2SymbolType m_code2symbol;
     // CONSTRUCTORS
     VL_UNCOPYABLE(VerilatedLxt2);
+    void declSymbol(vluint32_t code, const char* name, int arraynum, int msb, int lsb, int flags);
 public:
     explicit VerilatedLxt2(lxt2_wr_trace* lxt2=NULL);
     ~VerilatedLxt2() { if (m_lxt2 == NULL) { lxt2_wr_close(m_lxt2); } }
@@ -86,8 +88,21 @@ public:
     /// Inside dumping routines, declare a module
     void module(const std::string& name);
     /// Inside dumping routines, declare a signal
-    void declBit(vluint32_t code, const char* name, int arraynum);
-    void declBus(vluint32_t code, const char* name, int arraynum, int msb, int lsb);
+    void declBit(vluint32_t code, const char* name, int arraynum) {
+        this->declSymbol(code, name, arraynum, 0, 0, LXT2_WR_SYM_F_BITS);
+    }
+    void declBus(vluint32_t code, const char* name, int arraynum, int msb, int lsb) {
+        this->declSymbol(code, name, arraynum, msb, lsb, LXT2_WR_SYM_F_BITS);
+    }
+    void declDouble(vluint32_t code, const char* name, int arraynum) {
+        this->declSymbol(code, name, arraynum, 63, 0, LXT2_WR_SYM_F_DOUBLE);
+    }
+    void declFloat(vluint32_t code, const char* name, int arraynum) {
+        this->declSymbol(code, name, arraynum, 63, 0, LXT2_WR_SYM_F_DOUBLE);
+    }
+    void declQuad(vluint32_t code, const char* name, int arraynum, int msb, int lsb) {
+        this->declSymbol(code, name, arraynum, msb, lsb, LXT2_WR_SYM_F_BITS);
+    }
 
     /// Inside dumping routines, dump one signal if it has changed
     void chgBit(vluint32_t code, const vluint32_t newval) {
@@ -96,40 +111,49 @@ public:
     void chgBus(vluint32_t code, const vluint32_t newval, int bits) {
         lxt2_wr_emit_value_int(m_lxt2, m_code2symbol[code], 0, newval);
     }
+    void chgDouble(vluint32_t code, const double newval) {
+        lxt2_wr_emit_value_double(m_lxt2, m_code2symbol[code], 0, newval);
+    }
+    void chgFloat(vluint32_t code, const float newval) {
+        lxt2_wr_emit_value_double(m_lxt2, m_code2symbol[code], 0, newval);
+    }
+    void chgQuad(vluint32_t code, const vluint64_t newval, int bits) {
+        char *str = new char[bits+1];
+        for (int i = 0; i < bits; ++i) {
+            str[i] = '0' + ((newval>>(bits-i-1))&1);
+        }
+        lxt2_wr_emit_value_bit_string(m_lxt2, m_code2symbol[code], 0, str);
+        delete[] str;
+    }
+
     void fullBit(vluint32_t code, const vluint32_t newval) { chgBit(code, newval); }
     void fullBus(vluint32_t code, const vluint32_t newval, int bits) { chgBus(code, newval, bits); }
+    void fullDouble(vluint32_t code, const double newval) { chgDouble(code, newval); }
+    void fullFloat(vluint32_t code, const float newval) { chgFloat(code, newval); }
+    void fullQuad(vluint32_t code, const vluint64_t newval, int bits) { chgQuad(code, newval, bits); }
 
     // TODO: Disabled functions
     // Even in a large module, these functions are not used?
-    void declQuad     (vluint32_t code, const char* name, int arraynum, int msb, int lsb);
     void declArray    (vluint32_t code, const char* name, int arraynum, int msb, int lsb);
     void declTriBit   (vluint32_t code, const char* name, int arraynum);
     void declTriBus   (vluint32_t code, const char* name, int arraynum, int msb, int lsb);
     void declTriQuad  (vluint32_t code, const char* name, int arraynum, int msb, int lsb);
     void declTriArray (vluint32_t code, const char* name, int arraynum, int msb, int lsb);
-    void declDouble   (vluint32_t code, const char* name, int arraynum);
-    void declFloat    (vluint32_t code, const char* name, int arraynum);
-    void fullQuad(vluint32_t code, const vluint64_t newval, int bits);
     void fullArray(vluint32_t code, const vluint32_t* newval, int bits);
     void fullTriBit(vluint32_t code, const vluint32_t newval, const vluint32_t newtri);
     void fullTriBus(vluint32_t code, const vluint32_t newval, const vluint32_t newtri, int bits);
     void fullTriQuad(vluint32_t code, const vluint64_t newval, const vluint32_t newtri, int bits);
     void fullTriArray(vluint32_t code, const vluint32_t* newvalp, const vluint32_t* newtrip, int bits);
-    void fullDouble(vluint32_t code, const double newval);
-    void fullFloat(vluint32_t code, const float newval);
     void fullBitX(vluint32_t code);
     void fullBusX(vluint32_t code, int bits);
     void fullQuadX(vluint32_t code, int bits);
     void fullArrayX(vluint32_t code, int bits);
     // Even in a large module, these functions are not used?
-    void chgQuad(vluint32_t code, const vluint64_t newval, int bits);
     void chgArray(vluint32_t code, const vluint32_t* newval, int bits);
     void chgTriBit(vluint32_t code, const vluint32_t newval, const vluint32_t newtri);
     void chgTriBus(vluint32_t code, const vluint32_t newval, const vluint32_t newtri, int bits);
     void chgTriQuad(vluint32_t code, const vluint64_t newval, const vluint32_t newtri, int bits);
     void chgTriArray(vluint32_t code, const vluint32_t* newvalp, const vluint32_t* newtrip, int bits);
-    void chgDouble(vluint32_t code, const double newval);
-    void chgFloat(vluint32_t code, const float newval);
 };
 
 //=============================================================================
