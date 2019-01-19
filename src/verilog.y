@@ -2644,32 +2644,58 @@ assignment_pattern<patternp>:	// ==IEEE: assignment_pattern
 	|	yP_TICKBRA '}'				{ $1->v3error("Unsupported: Empty '{}"); $$=NULL; }
 	;
 
+// ****** From 4.010 ****** 
+//// "datatype id = x {, id = x }"  |  "yaId = x {, id=x}" is legal
+// for_initialization<nodep>:	// ==IEEE: for_initialization + for_variable_declaration + extra terminating ";"
+// 	//			// IEEE: for_variable_declaration
+// 		for_initializationItemList ';'		{ $$ = $1; }
+// 	//			// IEEE: 1800-2017 empty initialization
+// 	|	';'					{ $$ = NULL; }
+// 	;
+// 
+// for_initializationItemList<nodep>:	// IEEE: [for_variable_declaration...]
+// 		for_initializationItem			{ $$ = $1; }
+// 	|	for_initializationItemList ',' for_initializationItem	{ $$ = $1; $$->addNext($3); }
+// 	;
+// 
+// for_initializationItem<nodep>:		// IEEE: variable_assignment + for_variable_declaration
+// 	//			// IEEE: for_variable_declaration
+// 		data_type idAny/*new*/ '=' expr
+// 			{ VARRESET_NONLIST(VAR); VARDTYPE($1);
+// 			  $$ = VARDONEA($<fl>2,*$2,NULL,NULL);
+// 			  $$->addNext(new AstAssign($3, new AstVarRef($3,*$2,true), $4));}
+// 	//			// IEEE-2012:
+// 	|	yVAR data_type idAny/*new*/ '=' expr
+// 			{ VARRESET_NONLIST(VAR); VARDTYPE($2);
+// 			  $$ = VARDONEA($<fl>3,*$3,NULL,NULL);
+// 			  $$->addNext(new AstAssign($4, new AstVarRef($4,*$3,true), $5));}
+// 	//			// IEEE: variable_assignment
+// 	|	varRefBase '=' expr			{ $$ = new AstAssign($2, $1, $3); }
+// 	;
+
+// ****** From 4.008
 // "datatype id = x {, id = x }"  |  "yaId = x {, id=x}" is legal
 for_initialization<nodep>:	// ==IEEE: for_initialization + for_variable_declaration + extra terminating ";"
 	//			// IEEE: for_variable_declaration
-		for_initializationItemList ';'		{ $$ = $1; }
-	//			// IEEE: 1800-2017 empty initialization
-	|	';'					{ $$ = NULL; }
+		for_initialization_type ';'	{ $$ = $1; }
+	|	for_initialization_no_type ';'	{ $$ = $1; }
+	|	 ';'				{ $$ = NULL; }
 	;
 
-for_initializationItemList<nodep>:	// IEEE: [for_variable_declaration...]
-		for_initializationItem			{ $$ = $1; }
-	|	for_initializationItemList ',' for_initializationItem	{ $$ = $1; $<fl>2->v3error("Unsupported: for loop initialization after the first comma"); }
-	;
-
-for_initializationItem<nodep>:		// IEEE: variable_assignment + for_variable_declaration
-	//			// IEEE: for_variable_declaration
+for_initialization_type<nodep>:
 		data_type idAny/*new*/ '=' expr
 			{ VARRESET_NONLIST(VAR); VARDTYPE($1);
 			  $$ = VARDONEA($<fl>2,*$2,NULL,NULL);
-			  $$->addNext(new AstAssign($3, new AstVarRef($3,*$2,true), $4));}
-	//			// IEEE-2012:
-	|	yVAR data_type idAny/*new*/ '=' expr
-			{ VARRESET_NONLIST(VAR); VARDTYPE($2);
-			  $$ = VARDONEA($<fl>3,*$3,NULL,NULL);
-			  $$->addNext(new AstAssign($4, new AstVarRef($4,*$3,true), $5));}
-	//			// IEEE: variable_assignment
-	|	varRefBase '=' expr			{ $$ = new AstAssign($2, $1, $3); }
+			  $$->addNext(new AstAssign($3,new AstVarRef($3,*$2,true),$4));}
+	|	for_initialization_type ',' idAny/*new*/ '=' expr
+			{ $$ = $1;
+			  $$->addNext(VARDONEA($<fl>3,*$3,NULL,NULL));
+			  $$->addNext(new AstAssign($4,new AstVarRef($4,*$3,true),$5));}
+	;
+
+for_initialization_no_type<nodep>:
+		varRefBase '=' expr					{ $$ = new AstAssign($2,$1,$3); }
+	|	for_initialization_no_type ',' varRefBase '=' expr	{ $$ = $1; $$->addNext(new AstAssign($4,$3,$5)); }
 	;
 
 for_stepE<nodep>:		// IEEE: for_step + empty
@@ -2679,7 +2705,7 @@ for_stepE<nodep>:		// IEEE: for_step + empty
 
 for_step<nodep>:		// IEEE: for_step
 		genvar_iteration			{ $$ = $1; }
-	|	for_step ',' genvar_iteration		{ $$ = $1; $<fl>1->v3error("Unsupported: for loop step after the first comma"); }
+	|	for_step ',' genvar_iteration		{ $$ = $1; $$->addNext($3); }
 	;
 
 loop_variables<nodep>:		// IEEE: loop_variables
